@@ -1,0 +1,9 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: habit_tracker
+      POSTGRES_PASSWORD: habit_tracker_dev_pw
+      POSTGRES_DB: habit_tracker
+    ports:
+      - "5433:5432"
