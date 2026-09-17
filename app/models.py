@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Date 
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -22,3 +22,17 @@ class Habit(Base):
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
     owner = relationship("User", back_populates="habits")
+    completions = relationship(
+        "HabitCompletion",
+        back_populates="habit",
+        cascade="all, delete-orphan"
+    )
+
+class HabitCompletion(Base):
+    __tablename__ = "habit_completions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    habit_id = Column(Integer, ForeignKey("habits.id"), nullable=False)
+    date = Column(Date, nullable=False)
+
+    habit = relationship("Habit", back_populates="completions")
