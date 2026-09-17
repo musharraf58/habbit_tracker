@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends,HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -37,3 +37,33 @@ def get_habits(
     habits = db.query(Habit).filter(Habit.owner_id == user_id).all()
 
     return habits
+
+
+@router.put("/{habit_id}", response_model=HabitResponse)
+def update_habit(
+    habit_id: int,
+    habit: HabitCreate,
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id)
+):
+    existing_habit = (
+        db.query(Habit)
+        .filter(
+            Habit.id == habit_id,
+            Habit.owner_id == user_id
+        )
+        .first()
+    )
+
+    if not existing_habit:
+        raise HTTPException(
+            status_code=404,
+            detail="Habit not found"
+        )
+
+    existing_habit.name = habit.name
+
+    db.commit()
+    db.refresh(existing_habit)
+
+    return existing_habit
