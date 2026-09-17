@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Date 
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -36,3 +36,11 @@ class HabitCompletion(Base):
     date = Column(Date, nullable=False)
 
     habit = relationship("Habit", back_populates="completions")
+
+    __table_args__ = (
+        UniqueConstraint(
+            "habit_id",
+            "date",
+            name="uq_habit_completion_date"
+        ),
+    )
