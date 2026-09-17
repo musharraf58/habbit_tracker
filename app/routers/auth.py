@@ -64,3 +64,17 @@ def login(user: UserCreate, db: Session = Depends(get_db)):
         "access_token": access_token,
         "token_type": "bearer"
     }
+
+from app.security import (
+    hash_password,
+    verify_password,
+    create_access_token,
+    get_current_user_id,
+)
+
+
+@router.get("/me")
+def get_me(user_id: int = Depends(get_current_user_id)):
+    return {
+        "user_id": user_id
+    }
