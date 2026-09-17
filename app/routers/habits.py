@@ -28,3 +28,12 @@ def create_habit(
     db.refresh(new_habit)
 
     return new_habit
+
+@router.get("/", response_model=list[HabitResponse])
+def get_habits(
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id)
+):
+    habits = db.query(Habit).filter(Habit.owner_id == user_id).all()
+
+    return habits
