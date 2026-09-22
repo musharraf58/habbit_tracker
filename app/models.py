@@ -1,4 +1,6 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Date, UniqueConstraint
+import datetime
+
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, UniqueConstraint,DateTime
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -20,6 +22,7 @@ class Habit(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
 
     owner = relationship("User", back_populates="habits")
     completions = relationship(
