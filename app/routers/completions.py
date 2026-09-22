@@ -185,6 +185,8 @@ def get_longest_streak(
 @router.get("/{habit_id}/stats")
 def get_habit_stats(
     habit_id: int,
+    start_date: date | None = None,
+    end_date: date | None = None,
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id)
 ):
@@ -203,21 +205,33 @@ def get_habit_stats(
             detail="Habit not found"
         )
 
-    total_completions = (
-        db.query(HabitCompletion)
-        .filter(HabitCompletion.habit_id == habit_id)
-        .count()
-    )
+    query = (
+    db.query(HabitCompletion)
+    .filter(HabitCompletion.habit_id == habit_id)
+)
+
+    if start_date and end_date:
+         days_in_period = (end_date - start_date).days + 1
+    elif start_date:
+         days_in_period = (date.today() - start_date).days + 1
+    elif end_date:
+         days_in_period = (end_date - habit.created_at.date()).days + 1
+    else:
+         days_in_period = (date.today() - habit.created_at.date()).days + 1
+
+    total_completions = query.count()
 
     days_since_creation = (date.today() - habit.created_at.date()).days + 1
 
     completion_percentage = (
-        total_completions / days_since_creation
+    total_completions / days_in_period
     ) * 100
 
+    
+
     return {
-        "habit_id": habit_id,
-        "total_completions": total_completions,
-        "days_since_creation": days_since_creation,
-        "completion_percentage": round(completion_percentage, 2)
-    }
+     "habit_id": habit_id,
+     "total_completions": total_completions,
+     "days_in_period": days_in_period,
+     "completion_percentage": round(completion_percentage, 2)
+}
