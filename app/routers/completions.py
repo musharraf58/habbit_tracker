@@ -235,3 +235,48 @@ def get_habit_stats(
      "days_in_period": days_in_period,
      "completion_percentage": round(completion_percentage, 2)
 }
+
+
+@router.delete("/{habit_id}/{completion_date}")
+def delete_completion(
+    habit_id: int,
+    completion_date: date,
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id)
+):
+    habit = (
+        db.query(Habit)
+        .filter(
+            Habit.id == habit_id,
+            Habit.owner_id == user_id
+        )
+        .first()
+    )
+
+    if not habit:
+        raise HTTPException(
+            status_code=404,
+            detail="Habit not found"
+        )
+
+    completion = (
+        db.query(HabitCompletion)
+        .filter(
+            HabitCompletion.habit_id == habit_id,
+            HabitCompletion.date == completion_date
+        )
+        .first()
+    )
+
+    if not completion:
+        raise HTTPException(
+            status_code=404,
+            detail="Completion not found"
+        )
+
+    db.delete(completion)
+    db.commit()
+
+    return {
+        "message": "Habit completion deleted successfully"
+    }
