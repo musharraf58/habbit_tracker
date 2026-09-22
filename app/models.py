@@ -23,6 +23,7 @@ class Habit(Base):
     name = Column(String, nullable=False)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    frequency = Column(String, nullable=False, default="daily")
 
     owner = relationship("User", back_populates="habits")
     completions = relationship(

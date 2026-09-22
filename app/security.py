@@ -3,6 +3,10 @@ from datetime import datetime, timedelta, timezone
 from jose import jwt
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 security = HTTPBearer()
 
@@ -20,7 +24,7 @@ def verify_password(password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(password_bytes, hashed_bytes)
 
 
-SECRET_KEY = "change-this-to-a-long-random-string"
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
