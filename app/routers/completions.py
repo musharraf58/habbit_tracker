@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException,Query
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.database import get_db
 from app.models import HabitCompletion, Habit
-from app.schemas import CompletionCreate, CompletionResponse
+from app.schemas import CompletionCreate, CompletionResponse, CompletionListResponse
 from app.security import get_current_user_id
 from datetime import date, timedelta
 
@@ -51,10 +51,13 @@ def complete_habit(
         )
 
     db.refresh(new_completion)
+    return new_completion
 
-@router.get("/{habit_id}", response_model=list[CompletionResponse])
+@router.get("/{habit_id}", response_model=CompletionListResponse)
 def get_completions(
     habit_id: int,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100),
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id)
 ):
@@ -73,14 +76,27 @@ def get_completions(
             detail="Habit not found"
         )
 
-    completions = (
+    query = (
         db.query(HabitCompletion)
         .filter(HabitCompletion.habit_id == habit_id)
+    )
+
+    total = query.count()
+
+    completions = (
+        query
         .order_by(HabitCompletion.date.desc())
+        .offset(skip)
+        .limit(limit)
         .all()
     )
 
-    return completions
+    return {
+        "items": completions,
+        "total": total,
+        "skip": skip,
+        "limit": limit
+    }
 
 
 

@@ -13,7 +13,8 @@ router = APIRouter(
 )
 
 
-@router.post("/register")
+
+@router.post("/register",status_code=201)
 def register(user: UserCreate, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(User.email == user.email).first()
 
