@@ -7,3 +7,13 @@ services:
       POSTGRES_DB: habit_tracker
     ports:
       - "5433:5432"
+
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://habit_tracker:habit_tracker_dev_pw@db:5432/habit_tracker
+      SECRET_KEY: ${SECRET_KEY}
+    depends_on:
+      - db
